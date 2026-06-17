@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orion Pakistan – Home Appliances</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root[data-theme="light"] {
+    --bg: #FFFFFF;
+    --bg2: #F7F9FC;
+    --bg3: #EDF1F9;
+    --card: #FFFFFF;
+    --border: #E1E7F0;
+    --text: #0B1E3D;
+    --text2: #5A6B85;
+    --accent: #1D5FE0;
+    --accent2: #F5A623;
+    --glow: rgba(29,95,224,0.08);
+    --nav-bg: rgba(255,255,255,0.95);
+    --shadow: 0 4px 24px rgba(15,30,60,0.08);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0B1220;
+    --bg2: #111B2E;
+    --bg3: #16223A;
+    --card: #131D32;
+    --border: #223252;
+    --text: #EEF2FB;
+    --text2: #8A98B5;
+    --accent: #4C8DFF;
+    --accent2: #F5A623;
+    --glow: rgba(76,141,255,0.15);
+    --nav-bg: rgba(11,18,32,0.95);
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); transition: background .3s, color .3s; }
+
+  .skeleton { background: linear-gradient(90deg, var(--bg3) 25%, var(--border) 50%, var(--bg3) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* NAV */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 999; background: var(--nav-bg); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); padding: 0 5%; display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; color: var(--text); text-decoration: none; }
+  .logo-icon { width: 34px; height: 34px; background: var(--accent); clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); display: flex; align-items: center; justify-content: center; font-size: .8rem; color: white; font-weight: 700; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+  .nav-links a { color: var(--text2); text-decoration: none; font-size: .88rem; font-weight: 500; transition: color .2s; cursor: pointer; }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-right { display: flex; align-items: center; gap: 1rem; }
+  .theme-toggle { background: var(--bg3); border: 1px solid var(--border); border-radius: 50px; padding: 6px 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: .8rem; color: var(--text2); }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-cta { background: var(--accent); color: white !important; padding: 8px 18px; border-radius: 6px; font-size: .82rem; font-weight: 600; text-decoration: none; }
+  .hamburger { display: none; background: none; border: none; cursor: pointer; color: var(--text); font-size: 1.4rem; }
+  .mobile-menu { display: none; position: fixed; top: 68px; left: 0; right: 0; background: var(--nav-bg); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); padding: 1.2rem 5%; z-index: 998; flex-direction: column; gap: .9rem; }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a { color: var(--text); text-decoration: none; font-size: 1rem; padding: .4rem 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+
+  /* BANNER CAROUSEL */
+  .banner-wrap { position: relative; margin-top: 68px; width: 100%; aspect-ratio: 16/6; min-height: 220px; overflow: hidden; background: var(--bg3); }
+  .banner-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .6s ease; }
+  .banner-slide.active { opacity: 1; }
+  .banner-slide img { width: 100%; height: 100%; object-fit: cover; }
+  .banner-slide .banner-fallback { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--accent), #0B1E3D); color: white; text-align: center; padding: 0 1rem; }
+  .banner-fallback h2 { font-family: 'Rajdhani', sans-serif; font-size: clamp(1.4rem, 4vw, 2.4rem); font-weight: 700; }
+  .banner-fallback p { font-size: .85rem; opacity: .85; margin-top: .4rem; max-width: 480px; }
+  .banner-dots { position: absolute; bottom: 14px; left: 0; right: 0; display: flex; justify-content: center; gap: 8px; z-index: 5; }
+  .banner-dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.55); cursor: pointer; transition: all .2s; border: none; }
+  .banner-dot.active { background: white; width: 22px; border-radius: 5px; }
+  .banner-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.85); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; color: var(--text); z-index: 5; display: flex; align-items: center; justify-content: center; }
+  .banner-arrow.left { left: 16px; } .banner-arrow.right { right: 16px; }
+
+  /* CATEGORY GRID */
+  .section { padding: 60px 5%; }
+  .section-inner { max-width: 1240px; margin: 0 auto; }
+  .section-header { text-align: center; margin-bottom: 2.2rem; }
+  .section-eyebrow { font-size: .72rem; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: .4rem; }
+  .section-title { font-family: 'Rajdhani', sans-serif; font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 700; }
+
+  .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; }
+  .category-card { position: relative; border-radius: 14px; overflow: hidden; cursor: pointer; aspect-ratio: 4/5; background: var(--bg3); border: 1px solid var(--border); transition: transform .25s, box-shadow .25s; }
+  .category-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+  .category-card img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+  .category-card .cat-icon-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.6rem; }
+  .category-card .cat-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.6rem 1rem .9rem; background: linear-gradient(to top, rgba(11,30,61,0.85), transparent); }
+  .category-card .cat-overlay h3 { font-family: 'Rajdhani', sans-serif; color: white; font-size: 1rem; font-weight: 700; letter-spacing: .5px; }
+  .category-card .cat-overlay span { color: rgba(255,255,255,0.8); font-size: .68rem; }
+
+  /* PRODUCTS */
+  .products-section { background: var(--bg2); }
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.2rem; }
+  .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: all .25s; cursor: pointer; }
+  .product-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow); }
+  .product-img { height: 170px; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 3.4rem; position: relative; overflow: hidden; }
+  .product-img img { width: 100%; height: 100%; object-fit: cover; }
+  .product-badge { position: absolute; top: 10px; left: 10px; background: var(--accent2); color: white; font-size: .64rem; font-weight: 700; padding: 3px 9px; border-radius: 50px; text-transform: uppercase; }
+  .product-info { padding: 1.1rem; }
+  .product-category { font-size: .66rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; margin-bottom: .35rem; }
+  .product-name { font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: .35rem; }
+  .product-desc { font-size: .76rem; color: var(--text2); line-height: 1.5; margin-bottom: .75rem; }
+  .product-colors { display: flex; align-items: center; gap: .5rem; margin-bottom: .75rem; }
+  .color-dots { display: flex; gap: 5px; }
+  .color-dot { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--border); }
+  .product-footer { display: flex; align-items: center; justify-content: space-between; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .product-tag { font-size: .68rem; padding: 3px 10px; border-radius: 50px; font-weight: 600; }
+  .tag-available { background: rgba(16,185,129,0.12); color: #0E9A6B; }
+  .tag-outofstock { background: rgba(239,68,68,0.12); color: #DC2626; }
+  .tag-comingsoon { background: var(--glow); color: var(--accent); }
+
+  /* WHY US */
+  .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.3rem; }
+  .why-card { padding: 1.6rem; background: var(--card); border: 1px solid var(--border); border-radius: 14px; text-align: center; }
+  .why-icon { width: 46px; height: 46px; background: var(--glow); border: 1px solid var(--accent); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin: 0 auto 1rem; }
+  .why-title { font-family: 'Rajdhani', sans-serif; font-size: .98rem; font-weight: 700; margin-bottom: .4rem; }
+  .why-desc { font-size: .78rem; color: var(--text2); line-height: 1.55; }
+
+  /* CONTACT */
+  .contact-section { background: var(--bg2); }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 3rem; align-items: start; }
+  .contact-info h2 { font-family: 'Rajdhani', sans-serif; font-size: 1.9rem; font-weight: 700; margin-bottom: .9rem; }
+  .contact-info p { color: var(--text2); line-height: 1.7; margin-bottom: 1.4rem; }
+  .contact-items { display: flex; flex-direction: column; gap: .9rem; }
+  .contact-item { display: flex; align-items: center; gap: .9rem; }
+  .contact-item-icon { width: 38px; height: 38px; background: var(--glow); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0; }
+  .contact-item-text { font-size: .84rem; }
+  .contact-item-label { color: var(--text2); font-size: .7rem; margin-bottom: 2px; }
+  .contact-form { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.8rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: .76rem; color: var(--text2); margin-bottom: 5px; font-weight: 500; }
+  .form-group input, .form-group textarea, .form-group select { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 13px; color: var(--text); font-size: .83rem; outline: none; transition: border-color .2s; font-family: inherit; }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 90px; }
+  .form-submit { width: 100%; background: var(--accent); color: white; border: none; border-radius: 8px; padding: 12px; font-size: .88rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .form-submit:hover { opacity: .9; }
+
+  /* FOOTER */
+  footer { background: var(--bg); border-top: 1px solid var(--border); padding: 2.6rem 5% 1.6rem; }
+  .footer-grid { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 2rem; margin-bottom: 1.8rem; }
+  .footer-brand p { color: var(--text2); font-size: .78rem; line-height: 1.65; margin-top: .75rem; max-width: 240px; }
+  .footer-col h4 { font-family: 'Rajdhani', sans-serif; font-size: .92rem; font-weight: 700; margin-bottom: .9rem; }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: .55rem; }
+  .footer-col ul li a { color: var(--text2); text-decoration: none; font-size: .78rem; cursor: pointer; }
+  .footer-col ul li a:hover { color: var(--accent); }
+  .footer-bottom { max-width: 1240px; margin: 0 auto; padding-top: 1.4rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .footer-bottom p { color: var(--text2); font-size: .74rem; }
+  .social-links { display: flex; gap: .6rem; }
+  .social-link { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text2); text-decoration: none; font-size: .8rem; transition: all .2s; }
+  .social-link:hover { border-color: var(--accent); color: var(--accent); }
+
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity .5s, transform .5s; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 900px) {
+    .contact-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+    .hamburger { display: block; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 500px) {
+    .footer-grid { grid-template-columns: 1fr; }
+    .banner-wrap { aspect-ratio: 4/5; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="javascript:void(0)" class="logo" id="navLogo">
+    <div class="logo-icon">O</div>
+    ORION<span>PK</span>
+  </a>
+  <ul class="nav-links">
+    <li><a onclick="scrollToId('categories')">Products</a></li>
+    <li><a onclick="scrollToId('featured')">Featured</a></li>
+    <li><a onclick="scrollToId('about')">About</a></li>
+    <li><a onclick="scrollToId('contact')">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
+    <a href="javascript:void(0)" class="nav-cta" onclick="scrollToId('contact')">Inquire Now</a>
+    <button class="hamburger" onclick="toggleMobile()">☰</button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a onclick="scrollToId('categories'); toggleMobile()">Products</a>
+  <a onclick="scrollToId('featured'); toggleMobile()">Featured</a>
+  <a onclick="scrollToId('about'); toggleMobile()">About</a>
+  <a onclick="scrollToId('contact'); toggleMobile()">Contact</a>
+</div>
+
+<!-- BANNER CAROUSEL -->
+<div class="banner-wrap" id="bannerWrap">
+  <div class="skeleton" style="position:absolute;inset:0"></div>
+</div>
+
+<!-- CATEGORIES -->
+<section class="section" id="categories">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">Our Range</div>
+      <h2 class="section-title">Shop by Category</h2>
+    </div>
+    <div class="category-grid reveal" id="categoryGrid">
+      <div class="skeleton" style="aspect-ratio:4/5"></div>
+      <div class="skeleton" style="aspect-ratio:4/5"></div>
+      <div class="skeleton" style="aspect-ratio:4/5"></div>
+      <div class="skeleton" style="aspect-ratio:4/5"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED PRODUCTS -->
+<section class="section products-section" id="featured">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">Catalog</div>
+      <h2 class="section-title">Featured Products</h2>
+    </div>
+    <div class="products-grid" id="productsGrid">
+      <div class="skeleton" style="height:300px"></div>
+      <div class="skeleton" style="height:300px"></div>
+      <div class="skeleton" style="height:300px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="section" id="about">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">Why Choose Us</div>
+      <h2 class="section-title">The Orion Difference</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card reveal"><div class="why-icon">🏭</div><div class="why-title">Quality Manufacturing</div><div class="why-desc">Premium components and rigorous quality control at every production stage.</div></div>
+      <div class="why-card reveal"><div class="why-icon">⚡</div><div class="why-title">Energy Efficient</div><div class="why-desc">Inverter technology and optimized motors reduce electricity consumption.</div></div>
+      <div class="why-card reveal"><div class="why-icon">🛡️</div><div class="why-title">Reliable Warranty</div><div class="why-desc">Comprehensive after-sales support and warranty coverage on every product.</div></div>
+      <div class="why-card reveal"><div class="why-icon">🇵🇰</div><div class="why-title">Made for Pakistan</div><div class="why-desc">Designed for Pakistani climate, voltage fluctuations, and family use.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section contact-section" id="contact">
+  <div class="section-inner">
+    <div class="contact-grid">
+      <div class="contact-info reveal">
+        <div class="section-eyebrow">Get in Touch</div>
+        <h2 id="contactHeading">Interested in Orion Products?</h2>
+        <p id="contactSub">Whether you're a dealer, distributor, or looking to purchase — reach out to us. We'll get back to you as soon as possible.</p>
+        <div class="contact-items" id="contactItems"></div>
+      </div>
+      <div class="contact-form reveal">
+        <div class="form-row">
+          <div class="form-group"><label>Full Name</label><input type="text" placeholder="Your name" id="formName"></div>
+          <div class="form-group"><label>Phone Number</label><input type="tel" placeholder="+92 XXX XXXXXXX" id="formPhone"></div>
+        </div>
+        <div class="form-group"><label>Interested In</label>
+          <select id="formInterest"><option value="">Select a product</option></select>
+        </div>
+        <div class="form-group"><label>Message</label><textarea placeholder="Tell us about your requirements..." id="formMessage"></textarea></div>
+        <button class="form-submit" onclick="submitInquiry()">Send via WhatsApp →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="javascript:void(0)" class="logo" style="text-decoration:none">
+        <div class="logo-icon">O</div>
+        ORION<span style="color:var(--accent)">PK</span>
+      </a>
+      <p id="footerDesc">Premium home appliances engineered for Pakistan. Quality you can trust, comfort you deserve.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Products</h4>
+      <ul id="footerCategories"></ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a onclick="scrollToId('about')">About Orion</a></li>
+        <li><a onclick="scrollToId('contact')">Contact Us</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul id="footerContact"></ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p id="footerCopyright">© 2026 Orion Pakistan. All rights reserved.</p>
+    <div class="social-links" id="socialLinks"></div>
+  </div>
+</footer>
+
+<script>
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwhGiFIG4EsPEqiaRY6SD7G4slKqfqosK8uCXOydxcMkrHKDiMpcRZUMk6U5EU0KAI/exec';
+
+  const CATEGORY_ICONS = {
+    'Air Cooler': '❄️', 'Inverter Cooler': '⚡', 'Washing Machine': '🫧', 'Dryer': '💨'
+  };
+
+  let SETTINGS = {};
+  let PRODUCTS = [];
+
+  function scrollToId(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function toggleMobile() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const btn = document.getElementById('themeBtn');
+    const isLight = html.getAttribute('data-theme') === 'light';
+    html.setAttribute('data-theme', isLight ? 'dark' : 'light');
+    btn.textContent = isLight ? '🌙 Dark' : '☀️ Light';
+    localStorage.setItem('orion_theme', isLight ? 'dark' : 'light');
+  }
+
+  function parseColors(str) {
+    if (!str) return [];
+    return str.split('|').map(c => {
+      const [hex, name] = c.split(':');
+      return { hex: (hex||'').trim() || '#ccc', name: (name||'').trim() };
+    }).filter(c => c.hex);
+  }
+
+  function statusTagClass(status) {
+    if (status === 'Available') return 'tag-available';
+    if (status === 'Out of Stock') return 'tag-outofstock';
+    return 'tag-comingsoon';
+  }
+
+  async function loadData() {
+    try {
+      const [settingsRes, productsRes] = await Promise.all([
+        fetch(API_URL + '?action=getSettings').then(r => r.json()),
+        fetch(API_URL + '?action=getProducts').then(r => r.json())
+      ]);
+      SETTINGS = settingsRes.settings || {};
+      PRODUCTS = productsRes.products || [];
+      renderAll();
+    } catch (e) {
+      console.error('Failed to load data', e);
+      renderAll();
+    }
+  }
+
+  function renderAll() {
+    renderBanner();
+    renderCategories();
+    renderProducts();
+    renderContact();
+    renderFooter();
+  }
+
+  function renderBanner() {
+    const slides = [
+      { title: SETTINGS.tagline || 'Power Your Home with Orion', sub: "Premium air coolers, washing machines, dryers, and inverter cooling systems — engineered for Pakistani homes." },
+      { title: 'Built for Pakistani Summers', sub: 'High-capacity cooling that keeps up with the heat and the load shedding.' },
+      { title: 'Trusted Quality, Honest Prices', sub: 'Appliances designed to last, backed by real after-sales support.' }
+    ];
+    const wrap = document.getElementById('bannerWrap');
+    wrap.innerHTML = slides.map((s, i) => `
+      <div class="banner-slide ${i===0?'active':''}" data-index="${i}">
+        <div class="banner-fallback">
+          <h2>${s.title}</h2>
+          <p>${s.sub}</p>
+        </div>
+      </div>
+    `).join('') + `
+      <button class="banner-arrow left" onclick="changeBanner(-1)">‹</button>
+      <button class="banner-arrow right" onclick="changeBanner(1)">›</button>
+      <div class="banner-dots">${slides.map((_,i) => `<button class="banner-dot ${i===0?'active':''}" onclick="goToBanner(${i})"></button>`).join('')}</div>
+    `;
+    window._bannerCount = slides.length;
+    window._bannerIndex = 0;
+    startBannerAuto();
+  }
+
+  function goToBanner(i) {
+    const slides = document.querySelectorAll('.banner-slide');
+    const dots = document.querySelectorAll('.banner-dot');
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+    slides[i].classList.add('active');
+    dots[i].classList.add('active');
+    window._bannerIndex = i;
+  }
+
+  function changeBanner(dir) {
+    let i = (window._bannerIndex + dir + window._bannerCount) % window._bannerCount;
+    goToBanner(i);
+  }
+
+  function startBannerAuto() {
+    if (window._bannerInterval) clearInterval(window._bannerInterval);
+    window._bannerInterval = setInterval(() => changeBanner(1), 5000);
+  }
+
+  function renderCategories() {
+    const cats = [...new Set(PRODUCTS.map(p => p.category).filter(Boolean))];
+    const list = cats.length ? cats : Object.keys(CATEGORY_ICONS);
+    const grid = document.getElementById('categoryGrid');
+    grid.innerHTML = list.map(cat => {
+      const count = PRODUCTS.filter(p => p.category === cat).length;
+      return `
+        <div class="category-card" onclick="scrollToId('featured')">
+          <div class="cat-icon-fallback">${CATEGORY_ICONS[cat] || '📦'}</div>
+          <div class="cat-overlay">
+            <h3>${cat}</h3>
+            <span>${count ? count + ' Models' : 'Explore'}</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderProducts() {
+    const grid = document.getElementById('productsGrid');
+    const select = document.getElementById('formInterest');
+
+    if (!PRODUCTS.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text2)">
+        <div style="font-size:2rem;margin-bottom:.5rem">📦</div>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;color:var(--text);margin-bottom:.3rem">No products yet</div>
+        <div style="font-size:.8rem">Products will appear here once added via the admin panel.</div>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = PRODUCTS.map(p => `
+      <div class="product-card">
+        <div class="product-img">
+          ${CATEGORY_ICONS[p.category] || '📦'}
+          ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
+        </div>
+        <div class="product-info">
+          <div class="product-category">${p.category || ''}</div>
+          <div class="product-name">${p.name || ''}</div>
+          <div class="product-desc">${p.description || ''}</div>
+          <div class="product-colors">
+            <div class="color-dots">${parseColors(p.colors).map(c => `<div class="color-dot" style="background:${c.hex}" title="${c.name}"></div>`).join('')}</div>
+          </div>
+          <div class="product-footer">
+            <span class="product-tag ${statusTagClass(p.status)}">${p.status || 'Available'}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    const cats = [...new Set(PRODUCTS.map(p => p.category).filter(Boolean))];
+    select.innerHTML = '<option value="">Select a product</option>' + cats.map(c => `<option>${c}</option>`).join('') + '<option>Multiple Products</option>';
+  }
+
+  function renderContact() {
+    const items = [];
+    if (SETTINGS.address) items.push({ icon: '📍', label: 'Address', value: SETTINGS.address });
+    if (SETTINGS.phone) items.push({ icon: '📞', label: 'Phone', value: SETTINGS.phone });
+    if (SETTINGS.email) items.push({ icon: '✉️', label: 'Email', value: SETTINGS.email });
+    document.getElementById('contactItems').innerHTML = items.map(i => `
+      <div class="contact-item">
+        <div class="contact-item-icon">${i.icon}</div>
+        <div class="contact-item-text"><div class="contact-item-label">${i.label}</div>${i.value}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderFooter() {
+    document.getElementById('footerCopyright').textContent = `© 2026 ${SETTINGS.companyName || 'Orion Pakistan'}. All rights reserved.`;
+
+    const cats = [...new Set(PRODUCTS.map(p => p.category).filter(Boolean))];
+    document.getElementById('footerCategories').innerHTML = (cats.length ? cats : Object.keys(CATEGORY_ICONS))
+      .map(c => `<li><a onclick="scrollToId('featured')">${c}</a></li>`).join('');
+
+    const contactLinks = [];
+    if (SETTINGS.phone) contactLinks.push(SETTINGS.phone);
+    if (SETTINGS.email) contactLinks.push(SETTINGS.email);
+    if (SETTINGS.address) contactLinks.push(SETTINGS.address);
+    document.getElementById('footerContact').innerHTML = contactLinks.map(c => `<li><a>${c}</a></li>`).join('');
+
+    const socials = [
+      { key: 'facebook', label: 'f' },
+      { key: 'instagram', label: 'in' },
+      { key: 'youtube', label: 'yt' },
+      { key: 'whatsapp', label: 'wa' }
+    ];
+    document.getElementById('socialLinks').innerHTML = socials
+      .filter(s => SETTINGS[s.key])
+      .map(s => `<a href="${SETTINGS[s.key]}" target="_blank" class="social-link">${s.label}</a>`).join('');
+  }
+
+  async function submitInquiry() {
+    const name = document.getElementById('formName').value.trim();
+    const phone = document.getElementById('formPhone').value.trim();
+    const interest = document.getElementById('formInterest').value;
+    const message = document.getElementById('formMessage').value.trim();
+
+    if (!name || !phone) { alert('Please enter your name and phone number.'); return; }
+
+    const waNumber = (SETTINGS.whatsapp || SETTINGS.phone || '').replace(/[^0-9]/g, '');
+    const text = encodeURIComponent(`Hi, I'm ${name} (${phone}).\nInterested in: ${interest || 'General Inquiry'}\nMessage: ${message || 'N/A'}`);
+
+    if (waNumber) {
+      window.open(`https://wa.me/${waNumber}?text=${text}`, '_blank');
+    } else {
+      alert('Thanks ' + name + '! We will contact you soon at ' + phone);
+    }
+  }
+
+  // Theme init
+  (function() {
+    const saved = localStorage.getItem('orion_theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+      document.getElementById('themeBtn').textContent = saved === 'light' ? '☀️ Light' : '🌙 Dark';
+    }
+  })();
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(r => observer.observe(r));
+
+  loadData();
+</script>
+</body>
+</html>
