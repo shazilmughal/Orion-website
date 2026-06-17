@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orion Admin Panel</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root[data-theme="light"] {
+    --bg: #F7F9FC; --bg2: #FFFFFF; --bg3: #EDF1F9; --card: #FFFFFF;
+    --border: #E1E7F0; --text: #0B1E3D; --text2: #5A6B85;
+    --accent: #1D5FE0; --accent2: #F5A623; --success: #0E9A6B;
+    --danger: #DC2626; --warning: #D97706; --glow: rgba(29,95,224,0.08);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0B1220; --bg2: #111B2E; --bg3: #16223A; --card: #131D32;
+    --border: #223252; --text: #EEF2FB; --text2: #8A98B5;
+    --accent: #4C8DFF; --accent2: #F5A623; --success: #10B981;
+    --danger: #EF4444; --warning: #F59E0B; --glow: rgba(76,141,255,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background .3s, color .3s; }
+
+  /* LOGIN */
+  .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+  .login-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 380px; text-align: center; }
+  .login-logo { font-family: 'Rajdhani', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--accent); margin-bottom: .3rem; }
+  .login-sub { color: var(--text2); font-size: .82rem; margin-bottom: 2rem; }
+  .login-box input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 11px 14px; color: var(--text); font-size: .9rem; margin-bottom: 1rem; outline: none; }
+  .login-box input:focus { border-color: var(--accent); }
+  .login-btn { width: 100%; background: var(--accent); color: white; border: none; border-radius: 8px; padding: 12px; font-size: .9rem; font-weight: 600; cursor: pointer; }
+  .login-error { color: var(--danger); font-size: .8rem; margin-top: .8rem; display: none; }
+
+  /* LAYOUT */
+  .admin-layout { display: none; min-height: 100vh; }
+  .admin-layout.visible { display: flex; }
+  .sidebar { width: 240px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; transition: transform .3s; }
+  .sidebar-header { padding: 1.5rem; border-bottom: 1px solid var(--border); }
+  .sidebar-logo { font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 700; }
+  .sidebar-logo span { color: var(--accent); }
+  .sidebar-badge { font-size: .65rem; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; }
+  .sidebar-nav { padding: 1rem 0; flex: 1; overflow-y: auto; }
+  .nav-item { display: flex; align-items: center; gap: .8rem; padding: .75rem 1.5rem; cursor: pointer; color: var(--text2); font-size: .85rem; font-weight: 500; border-left: 3px solid transparent; }
+  .nav-item:hover { color: var(--text); background: var(--bg3); }
+  .nav-item.active { color: var(--accent); background: var(--glow); border-left-color: var(--accent); }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: .5rem; }
+  .theme-btn-side, .logout-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: 7px; padding: 8px 12px; font-size: .78rem; cursor: pointer; text-align: left; font-family: inherit; }
+  .theme-btn-side { color: var(--text2); } .theme-btn-side:hover { border-color: var(--accent); color: var(--accent); }
+  .logout-btn { color: var(--danger); background: none; } .logout-btn:hover { background: rgba(220,38,38,0.08); }
+
+  .main-content { margin-left: 240px; flex: 1; padding: 2rem; min-height: 100vh; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+  .page-title { font-family: 'Rajdhani', sans-serif; font-size: 1.6rem; font-weight: 700; }
+  .page-sub { color: var(--text2); font-size: .82rem; margin-top: 2px; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem; }
+  .stat-card-num { font-family: 'Rajdhani', sans-serif; font-size: 2rem; font-weight: 700; color: var(--accent); }
+  .stat-card-label { font-size: .75rem; color: var(--text2); margin-top: 3px; }
+
+  .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--success); color: white; padding: 12px 20px; border-radius: 10px; font-size: .85rem; font-weight: 500; z-index: 9999; opacity: 0; transform: translateY(10px); transition: all .3s; pointer-events: none; max-width: 320px; }
+  .toast.error { background: var(--danger); }
+  .toast.show { opacity: 1; transform: none; }
+
+  .btn { padding: 9px 18px; border-radius: 7px; font-size: .82rem; font-weight: 600; cursor: pointer; border: none; font-family: inherit; }
+  .btn-primary { background: var(--accent); color: white; } .btn-primary:hover { opacity: .88; }
+  .btn-danger { background: var(--danger); color: white; } .btn-danger:hover { opacity: .88; }
+  .btn-outline { background: none; border: 1px solid var(--border); color: var(--text); } .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .table-toolbar { padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .search-input { background: var(--bg3); border: 1px solid var(--border); border-radius: 7px; padding: 8px 14px; color: var(--text); font-size: .82rem; outline: none; width: 220px; font-family: inherit; }
+  .search-input:focus { border-color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  th { background: var(--bg3); padding: 10px 14px; text-align: left; color: var(--text2); font-weight: 600; font-size: .7rem; text-transform: uppercase; letter-spacing: .6px; white-space: nowrap; }
+  td { padding: 10px 14px; border-top: 1px solid var(--border); vertical-align: middle; }
+  tr:hover td { background: var(--bg3); }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 50px; font-size: .68rem; font-weight: 600; }
+  .badge-blue { background: var(--glow); color: var(--accent); }
+  .badge-green { background: rgba(14,154,107,0.12); color: var(--success); }
+  .badge-orange { background: rgba(245,166,35,0.15); color: var(--accent2); }
+  .badge-red { background: rgba(220,38,38,0.12); color: var(--danger); }
+  .color-preview { display: flex; gap: 4px; flex-wrap: wrap; }
+  .color-pip { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--border); }
+  .action-btns { display: flex; gap: 6px; }
+  .btn-sm { padding: 5px 10px; font-size: .72rem; border-radius: 5px; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(11,18,32,0.55); z-index: 500; display: none; align-items: center; justify-content: center; padding: 1rem; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; }
+  .modal-header { padding: 1.3rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; font-weight: 700; }
+  .modal-close { background: none; border: none; color: var(--text2); font-size: 1.2rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+  .modal-close:hover { background: var(--bg3); color: var(--text); }
+  .modal-body { padding: 1.5rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: .78rem; color: var(--text2); margin-bottom: 5px; font-weight: 500; }
+  .form-group input, .form-group textarea, .form-group select { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 7px; padding: 9px 12px; color: var(--text); font-size: .83rem; outline: none; font-family: inherit; }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-hint { font-size: .7rem; color: var(--text2); margin-top: 4px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .color-manager { display: flex; flex-direction: column; gap: .5rem; }
+  .color-row { display: flex; align-items: center; gap: .5rem; }
+  .color-row input[type="color"] { width: 40px; height: 36px; padding: 2px; border-radius: 6px; cursor: pointer; }
+  .color-row input[type="text"] { flex: 1; }
+  .color-row button { background: var(--danger); color: white; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; font-size: .9rem; }
+  .add-color-btn { background: none; border: 1px dashed var(--border); border-radius: 7px; padding: 7px; color: var(--text2); font-size: .78rem; cursor: pointer; font-family: inherit; width: 100%; }
+  .add-color-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: .7rem; }
+
+  .loading { text-align: center; padding: 3rem; color: var(--text2); font-size: .85rem; }
+  .spinner { display: inline-block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: .8rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty-state { text-align: center; padding: 3rem; color: var(--text2); }
+  .empty-icon { font-size: 2.5rem; margin-bottom: .8rem; }
+  .empty-title { font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; color: var(--text); margin-bottom: .4rem; }
+
+  .info-box { background: var(--glow); border: 1px solid var(--accent); border-radius: 10px; padding: 1rem 1.2rem; margin-bottom: 1.5rem; font-size: .82rem; color: var(--text2); line-height: 1.6; }
+  .info-box strong { color: var(--accent); }
+
+  .settings-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.2rem; }
+  .settings-card h3 { font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem; }
+
+  .mobile-toggle { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 1.1rem; cursor: pointer; color: var(--text); }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: none; }
+    .main-content { margin-left: 0; padding: 1rem; padding-top: 4rem; }
+    .mobile-toggle { display: block; }
+    .sidebar-overlay.open { display: block; }
+    .form-row { grid-template-columns: 1fr; }
+    table { font-size: .75rem; }
+    th, td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🔷 ORION</div>
+    <div class="login-sub">Admin Panel · Secure Access</div>
+    <input type="password" id="passwordInput" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')login()">
+    <button class="login-btn" onclick="login()">Login →</button>
+    <div class="login-error" id="loginError">❌ Wrong password. Try again.</div>
+  </div>
+</div>
+
+<button class="mobile-toggle" onclick="toggleSidebar()" id="mobileToggle">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="admin-layout" id="adminLayout">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">ORION<span>PK</span></div>
+      <div class="sidebar-badge">Admin Panel</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
+      <div class="nav-item" data-page="products" onclick="showPage('products')"><span class="nav-icon">📦</span> Products</div>
+      <div class="nav-item" data-page="company" onclick="showPage('company')"><span class="nav-icon">🏢</span> Company Info</div>
+      <div class="nav-item" data-page="social" onclick="showPage('social')"><span class="nav-icon">🔗</span> Social Links</div>
+      <div class="nav-item" data-page="settings" onclick="showPage('settings')"><span class="nav-icon">⚙️</span> Settings</div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="theme-btn-side" onclick="toggleTheme()" id="adminThemeBtn">🌙 Toggle Theme</button>
+      <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div><div class="page-title">Dashboard</div><div class="page-sub">Overview of your Orion website</div></div>
+        <button class="btn btn-primary" onclick="loadAllData()">🔄 Refresh</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-card-num" id="statTotal">—</div><div class="stat-card-label">Total Products</div></div>
+        <div class="stat-card"><div class="stat-card-num" id="statAvailable">—</div><div class="stat-card-label">Available</div></div>
+        <div class="stat-card"><div class="stat-card-num" id="statCategories">—</div><div class="stat-card-label">Categories</div></div>
+      </div>
+      <div class="info-box"><strong>📋 How it works:</strong> Everything here is saved directly to your Google Sheet. Changes appear on your live website within a few seconds — no need to redeploy anything.</div>
+      <div class="table-wrap">
+        <div class="table-toolbar"><strong style="font-size:.88rem">Recent Products</strong><button class="btn btn-primary btn-sm" onclick="showPage('products')">View All →</button></div>
+        <div id="dashTable"><div class="loading"><div class="spinner"></div><br>Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="page" id="page-products">
+      <div class="page-header">
+        <div><div class="page-title">Products</div><div class="page-sub">Manage your product catalog</div></div>
+        <div style="display:flex;gap:.7rem;flex-wrap:wrap">
+          <button class="btn btn-outline" onclick="loadAllData()">🔄 Refresh</button>
+          <button class="btn btn-primary" onclick="openAddModal()">+ Add Product</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="search-input" type="text" placeholder="🔍 Search products..." oninput="filterProducts(this.value)">
+          <span id="productCount" style="font-size:.78rem;color:var(--text2)"></span>
+        </div>
+        <div id="productsTable"><div class="loading"><div class="spinner"></div><br>Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- COMPANY INFO -->
+    <div class="page" id="page-company">
+      <div class="page-header"><div><div class="page-title">Company Info</div><div class="page-sub">Edit your brand details shown across the site</div></div></div>
+      <div class="settings-card">
+        <h3>Brand Details</h3>
+        <div class="form-row">
+          <div class="form-group"><label>Company Name</label><input type="text" id="s_companyName" placeholder="Orion Pakistan"></div>
+          <div class="form-group"><label>Tagline (Hero Banner)</label><input type="text" id="s_tagline" placeholder="Power Your Home with Orion"></div>
+        </div>
+      </div>
+      <div class="settings-card">
+        <h3>Contact Details</h3>
+        <div class="form-row">
+          <div class="form-group"><label>Phone Number</label><input type="text" id="s_phone" placeholder="+92 XXX XXXXXXX"></div>
+          <div class="form-group"><label>Email Address</label><input type="text" id="s_email" placeholder="info@orionpk.com"></div>
+        </div>
+        <div class="form-group"><label>Address</label><input type="text" id="s_address" placeholder="Pakistan"></div>
+      </div>
+      <button class="btn btn-primary" onclick="saveCompanyInfo()" id="saveCompanyBtn">💾 Save Company Info</button>
+    </div>
+
+    <!-- SOCIAL LINKS -->
+    <div class="page" id="page-social">
+      <div class="page-header"><div><div class="page-title">Social Links</div><div class="page-sub">Links shown in the footer. Leave blank to hide.</div></div></div>
+      <div class="settings-card">
+        <div class="form-group"><label>📘 Facebook URL</label><input type="text" id="s_facebook" placeholder="https://facebook.com/yourpage"></div>
+        <div class="form-group"><label>📷 Instagram URL</label><input type="text" id="s_instagram" placeholder="https://instagram.com/yourpage"></div>
+        <div class="form-group"><label>▶️ YouTube URL</label><input type="text" id="s_youtube" placeholder="https://youtube.com/@yourchannel"></div>
+        <div class="form-group"><label>💬 WhatsApp Number</label><input type="text" id="s_whatsapp" placeholder="+92XXXXXXXXXX"><div class="form-hint">Used for the website's "Send via WhatsApp" inquiry button.</div></div>
+      </div>
+      <button class="btn btn-primary" onclick="saveSocialLinks()" id="saveSocialBtn">💾 Save Social Links</button>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-header"><div class="page-title">Settings</div></div>
+      <div class="settings-card">
+        <h3>Admin Password</h3>
+        <div class="form-group"><input type="password" id="newPassword" placeholder="Set a new admin password"></div>
+        <button class="btn btn-primary" onclick="savePassword()">Save Password</button>
+      </div>
+      <div class="settings-card">
+        <h3>Backend Connection</h3>
+        <div class="form-group"><label>Google Apps Script URL</label><input type="text" id="apiUrlDisplay" readonly style="font-size:.72rem"></div>
+        <a href="https://docs.google.com/spreadsheets/d/1xhOUX1xsoFV2zMNOjOGaoEsOF3a1lCmV49H5Fx-kTbg" target="_blank" style="color:var(--accent);font-size:.85rem">📊 Open Google Sheet →</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="modalTitle">Add Product</div><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editRowIndex"><input type="hidden" id="editId">
+      <div class="form-row">
+        <div class="form-group"><label>Product Name *</label><input type="text" id="f_name" placeholder="e.g. Orion OAC-500"></div>
+        <div class="form-group"><label>Category *</label>
+          <select id="f_category">
+            <option value="">Select category</option>
+            <option>Air Cooler</option><option>Inverter Cooler</option><option>Washing Machine</option><option>Dryer</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Description</label><textarea id="f_description" placeholder="Product description..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Badge (optional)</label><input type="text" id="f_badge" placeholder="e.g. New, Bestseller"></div>
+        <div class="form-group"><label>Status</label>
+          <select id="f_status"><option value="Available">Available</option><option value="Out of Stock">Out of Stock</option><option value="Coming Soon">Coming Soon</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label>Colors</label><div class="color-manager" id="colorManager"></div><button class="add-color-btn" onclick="addColorRow()">+ Add Color</button></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProduct()" id="saveProductBtn">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwhGiFIG4EsPEqiaRY6SD7G4slKqfqosK8uCXOydxcMkrHKDiMpcRZUMk6U5EU0KAI/exec';
+  const DEFAULT_PASSWORD = 'orion2025';
+
+  let allProducts = [];
+  let allSettings = {};
+  let colorRows = [];
+
+  // AUTH
+  function login() {
+    const pass = document.getElementById('passwordInput').value;
+    const stored = localStorage.getItem('orion_admin_pass') || DEFAULT_PASSWORD;
+    if (pass === stored) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminLayout').classList.add('visible');
+      document.getElementById('mobileToggle').style.display = '';
+      document.getElementById('apiUrlDisplay').value = API_URL;
+      loadAllData();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  }
+
+  function logout() {
+    document.getElementById('loginScreen').style.display = '';
+    document.getElementById('adminLayout').classList.remove('visible');
+    document.getElementById('mobileToggle').style.display = 'none';
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('loginError').style.display = 'none';
+  }
+
+  function savePassword() {
+    const val = document.getElementById('newPassword').value.trim();
+    if (!val) { showToast('Enter a password first', 'error'); return; }
+    localStorage.setItem('orion_admin_pass', val);
+    document.getElementById('newPassword').value = '';
+    showToast('Password updated!');
+  }
+
+  // NAV
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    document.querySelector(`.nav-item[data-page="${id}"]`).classList.add('active');
+    if (window.innerWidth <= 768) toggleSidebar(true);
+  }
+
+  function toggleSidebar(forceClose) {
+    const sb = document.getElementById('sidebar');
+    const ov = document.getElementById('sidebarOverlay');
+    if (forceClose) { sb.classList.remove('open'); ov.classList.remove('open'); return; }
+    sb.classList.toggle('open'); ov.classList.toggle('open');
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (type === 'error' ? ' error' : '') + ' show';
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  // API HELPERS
+  async function apiGet(action) {
+    const res = await fetch(`${API_URL}?action=${action}`);
+    return res.json();
+  }
+
+  async function apiPost(action, data, extra = '') {
+    const body = `action=${action}&data=${encodeURIComponent(JSON.stringify(data))}${extra}`;
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body
+    });
+    return res.json();
+  }
+
+  // LOAD
+  async function loadAllData() {
+    try {
+      const [productsRes, settingsRes] = await Promise.all([apiGet('getProducts'), apiGet('getSettings')]);
+      allProducts = productsRes.products || [];
+      allSettings = settingsRes.settings || {};
+      renderProductTables();
+      updateStats();
+      populateSettingsForms();
+    } catch (e) {
+      showToast('Failed to connect to backend. Check your internet.', 'error');
+    }
+  }
+
+  function updateStats() {
+    document.getElementById('statTotal').textContent = allProducts.length;
+    document.getElementById('statAvailable').textContent = allProducts.filter(p => p.status === 'Available').length;
+    document.getElementById('statCategories').textContent = new Set(allProducts.map(p => p.category).filter(Boolean)).size;
+  }
+
+  function populateSettingsForms() {
+    document.getElementById('s_companyName').value = allSettings.companyName || '';
+    document.getElementById('s_tagline').value = allSettings.tagline || '';
+    document.getElementById('s_phone').value = allSettings.phone || '';
+    document.getElementById('s_email').value = allSettings.email || '';
+    document.getElementById('s_address').value = allSettings.address || '';
+    document.getElementById('s_facebook').value = allSettings.facebook || '';
+    document.getElementById('s_instagram').value = allSettings.instagram || '';
+    document.getElementById('s_youtube').value = allSettings.youtube || '';
+    document.getElementById('s_whatsapp').value = allSettings.whatsapp || '';
+  }
+
+  async function saveCompanyInfo() {
+    const btn = document.getElementById('saveCompanyBtn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    const data = {
+      companyName: document.getElementById('s_companyName').value.trim(),
+      tagline: document.getElementById('s_tagline').value.trim(),
+      phone: document.getElementById('s_phone').value.trim(),
+      email: document.getElementById('s_email').value.trim(),
+      address: document.getElementById('s_address').value.trim()
+    };
+    try {
+      await apiPost('saveSettings', data);
+      Object.assign(allSettings, data);
+      showToast('Company info saved! ✅ Website will update shortly.');
+    } catch (e) { showToast('Save failed. Try again.', 'error'); }
+    btn.disabled = false; btn.textContent = '💾 Save Company Info';
+  }
+
+  async function saveSocialLinks() {
+    const btn = document.getElementById('saveSocialBtn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    const data = {
+      facebook: document.getElementById('s_facebook').value.trim(),
+      instagram: document.getElementById('s_instagram').value.trim(),
+      youtube: document.getElementById('s_youtube').value.trim(),
+      whatsapp: document.getElementById('s_whatsapp').value.trim()
+    };
+    try {
+      await apiPost('saveSettings', data);
+      Object.assign(allSettings, data);
+      showToast('Social links saved! ✅');
+    } catch (e) { showToast('Save failed. Try again.', 'error'); }
+    btn.disabled = false; btn.textContent = '💾 Save Social Links';
+  }
+
+  // PRODUCTS TABLE
+  function renderProductTables() {
+    renderProductsTable(allProducts);
+    document.getElementById('dashTable').innerHTML = allProducts.length ? tableHTML(allProducts.slice(0, 5)) : emptyHTML();
+    document.getElementById('productCount').textContent = allProducts.length + ' products';
+  }
+
+  function renderProductsTable(products) {
+    document.getElementById('productsTable').innerHTML = products.length ? tableHTML(products) : emptyHTML();
+  }
+
+  function tableHTML(products) {
+    return `<div style="overflow-x:auto"><table>
+      <thead><tr><th>Name</th><th>Category</th><th>Colors</th><th>Badge</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>${products.map(p => `
+        <tr>
+          <td><strong>${escapeHtml(p.name)||'—'}</strong><br><span style="font-size:.7rem;color:var(--text2)">${escapeHtml((p.description||'').substring(0,40))}${(p.description||'').length>40?'...':''}</span></td>
+          <td><span class="badge badge-blue">${escapeHtml(p.category)||'—'}</span></td>
+          <td><div class="color-preview">${parseColors(p.colors).map(c => `<div class="color-pip" style="background:${c.hex}" title="${escapeHtml(c.name)}"></div>`).join('')}</div></td>
+          <td>${p.badge ? `<span class="badge badge-orange">${escapeHtml(p.badge)}</span>` : '—'}</td>
+          <td><span class="badge ${p.status==='Available'?'badge-green':p.status==='Out of Stock'?'badge-red':'badge-orange'}">${p.status||'Available'}</span></td>
+          <td><div class="action-btns">
+            <button class="btn btn-outline btn-sm" onclick="editProduct('${p.id}')">✏️ Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}', '${escapeHtml(p.name)}')">🗑️</button>
+          </div></td>
+        </tr>`).join('')}
+      </tbody></table></div>`;
+  }
+
+  function emptyHTML() {
+    return `<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">No products yet</div><div style="font-size:.8rem">Add your first product using the button above</div></div>`;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  function parseColors(str) {
+    if (!str) return [];
+    return str.split('|').map(c => { const [hex, name] = c.split(':'); return { hex: (hex||'').trim()||'#ccc', name: (name||'').trim() }; }).filter(c => c.hex);
+  }
+
+  function filterProducts(query) {
+    const q = query.toLowerCase();
+    const filtered = allProducts.filter(p => (p.name||'').toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q));
+    renderProductsTable(filtered);
+    document.getElementById('productCount').textContent = filtered.length + ' products';
+  }
+
+  // MODAL
+  function openAddModal() {
+    document.getElementById('modalTitle').textContent = 'Add Product';
+    document.getElementById('editRowIndex').value = '';
+    document.getElementById('editId').value = '';
+    document.getElementById('f_name').value = '';
+    document.getElementById('f_category').value = '';
+    document.getElementById('f_description').value = '';
+    document.getElementById('f_badge').value = '';
+    document.getElementById('f_status').value = 'Available';
+    colorRows = [];
+    addColorRow();
+    document.getElementById('productModal').classList.add('open');
+  }
+
+  function editProduct(id) {
+    const p = allProducts.find(x => x.id == id);
+    if (!p) return;
+    document.getElementById('modalTitle').textContent = 'Edit Product';
+    document.getElementById('editRowIndex').value = p.rowIndex;
+    document.getElementById('editId').value = p.id;
+    document.getElementById('f_name').value = p.name || '';
+    document.getElementById('f_category').value = p.category || '';
+    document.getElementById('f_description').value = p.description || '';
+    document.getElementById('f_badge').value = p.badge || '';
+    document.getElementById('f_status').value = p.status || 'Available';
+    colorRows = parseColors(p.colors).map(c => ({ hex: c.hex, name: c.name }));
+    if (!colorRows.length) colorRows = [{ hex: '#ffffff', name: '' }];
+    renderColorRows();
+    document.getElementById('productModal').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('productModal').classList.remove('open'); }
+
+  function addColorRow(hex = '#ffffff', name = '') { colorRows.push({ hex, name }); renderColorRows(); }
+  function removeColorRow(i) { colorRows.splice(i, 1); renderColorRows(); }
+  function renderColorRows() {
+    document.getElementById('colorManager').innerHTML = colorRows.map((c, i) => `
+      <div class="color-row">
+        <input type="color" value="${c.hex}" onchange="colorRows[${i}].hex=this.value">
+        <input type="text" value="${escapeHtml(c.name)}" placeholder="Color name (e.g. White)" oninput="colorRows[${i}].name=this.value">
+        <button onclick="removeColorRow(${i})">✕</button>
+      </div>`).join('');
+  }
+
+  async function saveProduct() {
+    const name = document.getElementById('f_name').value.trim();
+    const category = document.getElementById('f_category').value;
+    if (!name || !category) { showToast('Name and category required!', 'error'); return; }
+
+    const btn = document.getElementById('saveProductBtn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+
+    const product = {
+      id: document.getElementById('editId').value || Date.now().toString(),
+      rowIndex: document.getElementById('editRowIndex').value,
+      name,
+      category,
+      description: document.getElementById('f_description').value.trim(),
+      colors: colorRows.filter(c => c.name).map(c => `${c.hex}:${c.name}`).join('|'),
+      badge: document.getElementById('f_badge').value.trim(),
+      status: document.getElementById('f_status').value
+    };
+
+    try {
+      await apiPost('saveProduct', product);
+      showToast(product.rowIndex ? 'Product updated! ✅' : 'Product added! ✅');
+      closeModal();
+      await loadAllData();
+    } catch (e) {
+      showToast('Save failed. Check connection.', 'error');
+    }
+    btn.disabled = false; btn.textContent = 'Save Product';
+  }
+
+  async function deleteProduct(id, name) {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    try {
+      await apiPost('deleteProduct', {}, `&id=${id}`);
+      showToast('Product deleted.');
+      await loadAllData();
+    } catch (e) {
+      showToast('Delete failed. Try again.', 'error');
+    }
+  }
+</script>
+</body>
+</html>
